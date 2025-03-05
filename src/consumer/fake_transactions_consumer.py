@@ -13,3 +13,4 @@ print('Listening for messages')
 for message in consumer:
     print('Received', message)
 
+

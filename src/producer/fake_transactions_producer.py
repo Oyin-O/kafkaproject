@@ -3,6 +3,7 @@ import json
 import time
 from faker import Faker
 import random
+from ..utils.data_generator import generate_transaction
 
 fake = Faker()
 
@@ -17,24 +18,11 @@ producer = KafkaProducer(
 )
 
 
-# generate fake transactions
-def transaction_generator():
-    """Generate fake transaction data"""
-
-    return {
-        'transaction_id': fake.uuid4(),
-        'user_id': fake.random_int(min=100, max=999),
-        'amount': round(random.uniform(10, 1000), 2),
-        'timestamp': fake.date_time_this_year().isoformat(),
-        'is_false': random.choice(['True', 'False'])
-    }
-
-
 def send_transactions():
     """Send transactions to kafka continously"""
     while True:
         print('sending transactions')
-        transactions = transaction_generator()
+        transactions = generate_transaction()
         producer.send(topic=topic_name, value=transactions)
         print(f'sent:{transactions}')
         time.sleep(2)
