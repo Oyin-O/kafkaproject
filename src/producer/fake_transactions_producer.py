@@ -3,13 +3,16 @@ import json
 import time
 from faker import Faker
 import random
-from ..utils.data_generator import generate_transaction
+from src.utils.data_generator import generate_transaction
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
+                    handlers=[logging.FileHandler('producer.log')])
 
 fake = Faker()
 
 # kafka configuration
 broker = 'localhost:9092'
-topic_name = 'fraud_transactions'
+topic_name = 'fraud-transactions'
 
 # initialise Kafka Producer
 producer = KafkaProducer(
@@ -19,12 +22,14 @@ producer = KafkaProducer(
 
 
 def send_transactions():
-    """Send transactions to kafka continously"""
+    """Send transactions to kafka continuously"""
     while True:
-        print('sending transactions')
         transactions = generate_transaction()
-        producer.send(topic=topic_name, value=transactions)
-        print(f'sent:{transactions}')
+        try:
+            producer.send(topic=topic_name, value=transactions)
+            logging.info(f'sent:{transactions}')
+        except Exception as e:
+            logging.error(f"Error sending transaction: {transactions}. Error: {str(e)}")
         time.sleep(2)
 
 
