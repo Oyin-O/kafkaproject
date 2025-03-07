@@ -1,4 +1,5 @@
 from kafka import KafkaConsumer
+from database import store_fraud_transaction
 import json
 import logging
 logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler('consumer.log')])
@@ -6,7 +7,7 @@ logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler('consumer.
 
 def is_fraud(transaction_dict):
     amount = transaction_dict.get('amount', 0)
-    return amount > 1000
+    return amount > 800
 
 
 consumer = KafkaConsumer(
@@ -22,7 +23,8 @@ for message in consumer:
     transaction = json.loads(message.value)
     transaction['fraudulent'] = is_fraud(transaction)
     if transaction["fraudulent"]:
+        store_fraud_transaction(transaction)
         logging.info(f"⚠️ FRAUD DETECTED: {transaction}")
-    else:
-        logging.info(f"✅ Transaction OK: {transaction}")
+    # else:
+    #     logging.info(f"✅ Transaction OK: {transaction}")
     # consumer.commit()

@@ -18,3 +18,5 @@ def generate_transaction():
         'fraudulent': random.choice([True, False])
     }
     return json.dumps(transaction)
+
+
