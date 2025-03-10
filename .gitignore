@@ -12,3 +12,7 @@ data/
 
 # Ignore Docker-related files
 docker/*.log
+
+# Ignore .env
+.env
+

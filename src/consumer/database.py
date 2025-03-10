@@ -1,10 +1,13 @@
 import psycopg2
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 def store_fraud_transaction(transaction):
     try:
         # Establish the connection
-        conn = psycopg2.connect(dbname="fraud_transactions", user="postgres", password="mysecretpassword",
+        conn = psycopg2.connect(dbname=os.getenv('POSTGRES_DB'), user="root", password=os.getenv('POSTGRES_PASSWORD'),
                                 host="localhost", port="5432")
         cursor = conn.cursor()
 
@@ -25,15 +28,3 @@ def store_fraud_transaction(transaction):
 
     except Exception as e:
         print(f"Error saving transaction: {e}")
-
-# CREATE TABLE transactions (
-#     id SERIAL PRIMARY KEY,
-#     transaction_id VARCHAR(255),
-#     transaction_type VARCHAR(16),
-#     amount DECIMAL,
-#     user_id VARCHAR(255),
-#     timestamp TIMESTAMP,
-#     location VARCHAR(255),
-#     merchant VARCHAR(255),
-#     is_fraud BOOLEAN
-# );

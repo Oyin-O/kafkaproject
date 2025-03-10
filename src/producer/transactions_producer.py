@@ -12,7 +12,7 @@ fake = Faker()
 
 # kafka configuration
 broker = 'localhost:9092'
-topic_name = 'fraud-transactions'
+topic_name = 'fraud_transactions'
 
 # initialise Kafka Producer
 producer = KafkaProducer(

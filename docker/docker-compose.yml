@@ -1,28 +1,79 @@
-version: '3'
+version: '3.8'
+
 services:
+  # PostgreSQL for Fraud Transactions
+  postgres_fraud:
+    image: postgres:13
+    container_name: postgres_fraud
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # Kafka and Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    networks:
-      - kafka-network
+    ports:
+      - "2181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
     environment:
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - kafka-network
+    ports:
+      - "9092:9092"
+#    command: ["/bin/sh", "-c", "sleep 10 && /setup.sh"]
 
-networks:
-  kafka-network:
-    driver: bridge
+  # Airflow PostgreSQL Database
+  postgres_airflow:
+    image: postgres:13
+    container_name: postgres_airflow
+    environment:
+      POSTGRES_USER: ${AIRFLOW_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    restart: always
+
+  # Airflow Scheduler
+  airflow_scheduler:
+    image: apache/airflow:2.7.3
+    container_name: airflow_scheduler
+    depends_on:
+      - postgres_airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@${AIRFLOW_DB_HOST}:${AIRFLOW_DB_PORT}/${AIRFLOW_POSTGRES_DB}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: scheduler
+    restart: always
+
+  # Airflow Web UI
+  airflow_webserver:
+    image: apache/airflow:2.7.3
+    container_name: airflow_webserver
+    depends_on:
+      - airflow_scheduler
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres_airflow:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: webserver
+    restart: always
