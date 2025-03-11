@@ -6,5 +6,5 @@ COPY setup.sh /setup.sh
 # Ensure script is executable
 RUN chmod +x /setup.sh
 
-# Run setup script (or remove this if unnecessary)
+# Run setup script
 CMD ["/bin/sh", "-c", "sleep 10 && /setup.sh"]

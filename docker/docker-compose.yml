@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL for Fraud Transactions
   postgres_fraud:
     image: postgres:13
     container_name: postgres_fraud
@@ -13,7 +12,7 @@ services:
       - "5432:5432"
     restart: always
 
-  # Kafka and Zookeeper
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
