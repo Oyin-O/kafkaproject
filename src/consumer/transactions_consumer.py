@@ -24,7 +24,7 @@ for message in consumer:
     transaction['fraudulent'] = is_fraud(transaction)
     if transaction["fraudulent"]:
         store_fraud_transaction(transaction)
-        logging.info(f"⚠️ FRAUD DETECTED: {transaction}")
+        logging.info(f"FRAUD DETECTED: {transaction}")
     # else:
-    #     logging.info(f"✅ Transaction OK: {transaction}")
+    #     logging.info(f"Transaction OK: {transaction}")
     # consumer.commit()
